@@ -19,6 +19,7 @@
     "express": "^5.2.1",
     "hono": "^4.11.3",
     "https-proxy-agent": "^7.0.6",
+    "node-fetch": "^3.3.2",
     "puppeteer": "^24.34.0",
     "wrangler": "^4.58.0"
   },

@@ -1,4 +1,10 @@
 import * as cheerio from 'cheerio';
+import fetch from 'node-fetch';
+import { HttpsProxyAgent } from 'https-proxy-agent';
+
+// Hardcoded Proxy (User Provided)
+const PROXY_URL = 'http://ikipfdis:z7x7yl9x6szs@142.111.48.253:7030';
+const proxyAgent = new HttpsProxyAgent(PROXY_URL);
 
 // Helper Utils (Inline)
 function normalizeSlug(slug) {
@@ -13,9 +19,6 @@ function normalizeSlug(slug) {
             slug = parts[parts.length - 2] || parts[parts.length - 1]; // Fallback
         }
     }
-    // Remove year pattern like -2023 or -2024 if desired?
-    // User requested removal of years before, but let's keep it safe.
-    // The current robust logic found in utils.js:
     return slug.replace(/\/$/, '');
 }
 
@@ -37,7 +40,6 @@ function extractIdFromUrl(url) {
 class DrakorScraper {
     constructor() {
         this.baseUrl = 'https://drakorindo18.mywap.blog';
-        // Cloudflare Worker handles User-Agent automatically usually, but we set a browser one
         this.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'Referer': 'https://drakorindo18.mywap.blog'
@@ -46,7 +48,10 @@ class DrakorScraper {
 
     async fetchHtml(url) {
         try {
-            const res = await fetch(url, { headers: this.headers });
+            const res = await fetch(url, {
+                headers: this.headers,
+                agent: proxyAgent
+            });
             if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
             return await res.text();
         } catch (e) {
@@ -58,7 +63,8 @@ class DrakorScraper {
     async fetchJson(url) {
         try {
             const res = await fetch(url, {
-                headers: { ...this.headers, 'X-Requested-With': 'XMLHttpRequest' }
+                headers: { ...this.headers, 'X-Requested-With': 'XMLHttpRequest' },
+                agent: proxyAgent
             });
             if (!res.ok) throw new Error(`Fetch JSON failed: ${res.status}`);
             return await res.json();

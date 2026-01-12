@@ -5,6 +5,3 @@ compatibility_flags = ["nodejs_compat"]
 
 [build]
 command = "npm run build:pages"
-
-[vars]
-PROXY_URL = "http://ikipfdis:z7x7yl9x6szs@142.111.48.253:7030"

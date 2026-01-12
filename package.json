@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "build:pages": "esbuild src/worker.js --bundle --outfile=dist/_worker.js --format=esm --platform=neutral"
   },
   "keywords": [],
   "author": "",
@@ -20,5 +21,8 @@
     "https-proxy-agent": "^7.0.6",
     "puppeteer": "^24.34.0",
     "wrangler": "^4.58.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.2"
   }
 }

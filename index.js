@@ -29,20 +29,21 @@ app.get('/test', (req, res) => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drakor API Test Player</title>
+    <title>Drakor API Test Player v2 (Dramacool)</title>
     <style>
-        body { font-family: monospace; background: #eee; color: #333; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        body { font-family: monospace; background: #f4f4f4; color: #333; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-top: 5px solid #2ecc71; }
         h1 { margin-top: 0; }
         .section { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #ddd; }
-        button { cursor: pointer; padding: 5px 10px; background: #333; color: white; border: none; font-family: monospace; }
-        button:hover { background: #555; }
-        input { padding: 5px; width: 300px; font-family: monospace; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 10px; }
-        .card { cursor: pointer; border: 1px solid #ddd; padding: 5px; text-align: center; }
-        .card:hover { background: #f9f9f9; border-color: #333; }
-        .card img { max-width: 100%; height: auto; }
-        .card h4 { font-size: 12px; margin: 5px 0 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+        button { cursor: pointer; padding: 8px 15px; background: #2ecc71; color: white; border: none; font-family: monospace; font-weight: bold; border-radius: 4px; }
+        button:hover { background: #27ae60; }
+        input { padding: 8px; width: 300px; font-family: monospace; border: 1px solid #ccc; border-radius: 4px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; margin-top: 15px; }
+        .card { cursor: pointer; border: 1px solid #eee; padding: 8px; text-align: center; background: #fff; transition: transform 0.2s; border-radius: 4px; }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-color: #2ecc71; }
+        .card img { max-width: 100%; height: auto; border-radius: 4px; }
+        .card h4 { font-size: 13px; margin: 8px 0 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: #444; }
+
         #debug { background: #f0f0f0; padding: 10px; white-space: pre-wrap; font-size: 11px; max-height: 200px; overflow-y: auto; display: none; }
         .error { color: red; font-weight: bold; }
         video { width: 100%; margin-top: 10px; background: black; }

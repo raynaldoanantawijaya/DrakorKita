@@ -1,0 +1,5 @@
+{
+  "artifactType":  "ARTIFACT_TYPE_WALKTHROUGH",
+  "summary":  "Walkthrough of the network-level scraping solution. \nDetails the hidden API endpoints discovered (`episode.php`, `server.php`), the method used to extract required tokens (`movie_id`, `tag`), and how the final API normalizes this data.",
+  "updatedAt":  "2026-01-11T08:12:49.735739600Z"
+}

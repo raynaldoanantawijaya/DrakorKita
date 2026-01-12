@@ -1,0 +1,5 @@
+{
+  "artifactType":  "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary":  "Plan to build a scraping and API agent for drakorindo18.mywap.blog. \nIncludes structure for Express API, scraping logic using Cheerio/Puppeteer (if needed), and endpoint definitions.\nFocuses on extracting metadata, episode lists (handling dynamic JS), and implementing search.",
+  "updatedAt":  "2026-01-11T07:51:50.690001600Z"
+}

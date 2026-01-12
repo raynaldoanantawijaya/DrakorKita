@@ -1,0 +1,7 @@
+node_modules
+.env
+.DS_Store
+*.log
+network_log.json
+*.png
+*.webp

@@ -26,6 +26,9 @@ app.get('/debug', (req, res) => {
     });
 });
 
+// Diagnose Route
+app.use('/diagnose', require('./diagnose'));
+
 // Main Route
 const routes = require('./routes');
 app.use('/api/drakorindo', routes);

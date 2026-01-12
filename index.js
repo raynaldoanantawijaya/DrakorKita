@@ -46,9 +46,23 @@ app.get('/test-cheerio', (req, res) => {
 // Diagnose Route (Testing)
 app.use('/diagnose', require('./diagnose'));
 
-// Main Route
-const routes = require('./routes');
-app.use('/api/drakorindo', routes);
+// TEST DYNAMIC SCRAPER LOAD
+app.get('/test-scraper', async (req, res) => {
+    try {
+        const scraper = require('./scraper');
+        res.json({ status: 'Scraper loaded', type: typeof scraper });
+    } catch (err) {
+        res.status(500).json({
+            status: 'SCRAPER LOAD FAILED',
+            error: err.message,
+            stack: err.stack
+        });
+    }
+});
+
+// Main Route - DISABLED UNTIL WE FIX SCRAPER
+// const routes = require('./routes');
+// app.use('/api/drakorindo', routes);
 
 // 404
 app.use((req, res) => {

@@ -13,12 +13,12 @@
   "type": "commonjs",
   "dependencies": {
     "apicache": "^1.6.3",
+    "axios": "^1.13.2",
     "cheerio": "^1.1.2",
     "cors": "^2.8.5",
     "express": "^5.2.1",
     "hono": "^4.11.3",
     "https-proxy-agent": "^7.0.6",
-    "node-fetch": "^2.7.0",
     "wrangler": "^4.58.0"
   },
   "devDependencies": {

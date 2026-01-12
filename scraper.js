@@ -1,5 +1,5 @@
 const cheerio = require('cheerio');
-const fetch = require('node-fetch');
+const axios = require('axios');
 const { normalizeSlug, parseViews, extractIdFromUrl } = require('./utils');
 const { HttpsProxyAgent } = require('https-proxy-agent'); // Supports HTTP/HTTPS proxies
 
@@ -10,42 +10,38 @@ class DrakorScraper {
     constructor() {
         this.baseUrl = 'https://drakorindo18.mywap.blog';
         this.apiBase = 'https://api.drakorkita.cc/c_api';
-        this.proxyAgent = new HttpsProxyAgent(PROXY_URL);
+
+        // Axios Config with Proxy Agent
+        this.axiosInstance = axios.create({
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Referer': 'https://drakorindo18.mywap.blog'
+            },
+            httpsAgent: new HttpsProxyAgent(PROXY_URL),
+            httpAgent: new HttpsProxyAgent(PROXY_URL), // Handle both protocols
+            timeout: 15000 // 15s timeout
+        });
     }
 
     async fetchHtml(url) {
         try {
-            const options = {
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    'Referer': this.baseUrl
-                },
-                agent: this.proxyAgent
-            };
-
-            const response = await fetch(url, options);
-            if (!response.ok) throw new Error(`Fetch failed: ${response.status}`);
-            return await response.text();
+            const response = await this.axiosInstance.get(url);
+            return response.data;
         } catch (error) {
             console.error(`Error fetching ${url}:`, error.message);
+            if (error.response) {
+                console.error('Status:', error.response.status);
+            }
             return null;
         }
     }
 
     async fetchJson(url) {
         try {
-            const options = {
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    'Referer': this.baseUrl,
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                agent: this.proxyAgent
-            };
-
-            const response = await fetch(url, options);
-            if (!response.ok) throw new Error(`Fetch JSON failed: ${response.status}`);
-            return await response.json();
+            const response = await this.axiosInstance.get(url, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            return response.data;
         } catch (error) {
             console.error(`Error fetching JSON ${url}:`, error.message);
             return null;

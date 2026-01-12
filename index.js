@@ -31,12 +31,24 @@ app.get('/debug', (req, res) => {
     });
 });
 
+// TEST CHEERIO ISOLATION
+app.get('/test-cheerio', (req, res) => {
+    try {
+        const cheerio = require('cheerio');
+        const $ = cheerio.load('<html><body><h1>Hello</h1></body></html>');
+        const text = $('h1').text();
+        res.json({ status: 'OK', cheerio: 'loaded', parsed: text });
+    } catch (err) {
+        res.status(500).json({ status: 'FAIL', error: err.message, stack: err.stack });
+    }
+});
+
 // Diagnose Route (Testing)
 app.use('/diagnose', require('./diagnose'));
 
-// Main Route
-const routes = require('./routes');
-app.use('/api/drakorindo', routes);
+// Main Route - TEMPORARILY DISABLED
+// const routes = require('./routes');
+// app.use('/api/drakorindo', routes);
 
 // 404
 app.use((req, res) => {

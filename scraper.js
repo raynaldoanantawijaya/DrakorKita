@@ -12,14 +12,14 @@ class DrakorScraper {
         // Updated API Domain found via Puppeteer interception (Jan 2026)
         this.apiBase = 'https://drakorkita58.nicewap.sbs/c_api';
 
-        // Axios Config (Direct Connection - No Proxy)
+        // Axios Config with Proxy Agent
         this.axiosInstance = axios.create({
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                 'Referer': 'https://drakorindo18.mywap.blog'
             },
-            // httpsAgent: new HttpsProxyAgent(PROXY_URL), // DISABLED FOR LOCAL TEST
-            timeout: 15000
+            httpsAgent: new HttpsProxyAgent(PROXY_URL),
+            timeout: 15000 // 15s timeout
         });
     }
 

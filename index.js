@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const routes = require('./routes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -59,7 +58,7 @@ app.get('/test', (req, res) => {
 <div class="container">
     <div class="section">
         <h3>1. API Config</h3>
-        <input type="text" id="apiUrl" value="/api/drakorindo" placeholder="API Base URL">
+        <input type="text" id="apiUrl" value="/api/dramacool" placeholder="API Base URL">
         <button onclick="fetchLatest()">Load Latest Dramas</button>
         <div id="status" style="margin-top: 5px;"></div>
     </div>
@@ -130,7 +129,9 @@ app.get('/test', (req, res) => {
                     <img src="\${item.poster}" alt="poster">
                     <h4>\${item.title}</h4>
                 \`;
-                div.onclick = () => loadDetail(item.id);
+                // Check if item has id or path
+                const id = item.id || item.path;
+                div.onclick = () => loadDetail(id);
                 grid.appendChild(div);
             });
         } catch (e) {
@@ -144,6 +145,10 @@ app.get('/test', (req, res) => {
         el('playerSection').style.display = 'none';
         el('videoPlayer').pause();
         el('videoPlayer').src = "";
+        
+        const oldIframe = document.getElementById('iframePlayer');
+        if(oldIframe) oldIframe.remove();
+        el('player-container').style.display = 'none';
     }
 
     async function loadDetail(id) {
@@ -154,7 +159,19 @@ app.get('/test', (req, res) => {
         el('epList').innerHTML = '';
 
         try {
-            const res = await fetch(\`\${baseUrl}/detail/\${id}\`);
+            // Support both architectures (Path vs ID)
+            const param = baseUrl.includes('dramacool') ? \`path=\${encodeURIComponent(id)}\` : \`\${id}\`;
+            // If drakorindo, it expects /detail/:id, but generic handler might differ. 
+            // Let's assume the routes handle query vs params correctly or adjust here.
+            
+            let url = \`\${baseUrl}/detail\`;
+            if (baseUrl.includes('drakorindo')) {
+                 url = \`\${baseUrl}/detail/\${id}\`;
+            } else {
+                 url = \`\${baseUrl}/detail?path=\${encodeURIComponent(id)}\`;
+            }
+
+            const res = await fetch(url);
             const json = await res.json();
             
             if (!json.status) throw new Error('Detail API Error');
@@ -162,8 +179,8 @@ app.get('/test', (req, res) => {
 
             el('dramaTitle').innerText = data.title;
             el('dramaPoster').src = data.poster;
-            el('dramaStatus').innerText = data.status;
-            el('dramaRating').innerText = data.rating;
+            el('dramaStatus').innerText = data.status || '-';
+            el('dramaRating').innerText = data.rating || '-';
 
             const eps = data.episodes || [];
             if (eps.length === 0) {
@@ -174,8 +191,9 @@ app.get('/test', (req, res) => {
             eps.forEach(ep => {
                 const btn = document.createElement('button');
                 btn.className = 'ep-btn';
-                btn.innerText = \`Ep \${ep.episode}\`;
-                btn.onclick = () => playEpisode(ep.url);
+                btn.innerText = \`Ep \${ep.title || ep.episode}\`;
+                // Pass path for stream
+                btn.onclick = () => playEpisode(ep.path || ep.url);
                 el('epList').appendChild(btn);
             });
 
@@ -185,7 +203,7 @@ app.get('/test', (req, res) => {
         }
     }
 
-    async function playEpisode(url) {
+    async function playEpisode(path) {
         const baseUrl = el('apiUrl').value;
         el('playerSection').style.display = 'block';
         el('player-container').style.display = 'block';
@@ -193,168 +211,102 @@ app.get('/test', (req, res) => {
         el('debug').innerHTML = '';
         el('videoPlayer').style.display = 'none';
 
+        // Clean up old iframe
+        const oldIframe = document.getElementById('iframePlayer');
+        if (oldIframe) oldIframe.remove();
+
         try {
-            const streamRes = await fetch(\`\${baseUrl}/stream?url=\${encodeURIComponent(url)}\`);
+            const param = baseUrl.includes('dramacool') ? \`path=\${encodeURIComponent(path)}\` : \`url=\${encodeURIComponent(path)}\`;
+            
+            const streamRes = await fetch(\`\${baseUrl}/stream?\${param}\`);
             const streamJson = await streamRes.json();
             
             if (!streamJson.status) throw new Error('Stream API Failed');
             
-            // Fix: Extract resolve_url from sources array correctly
-            const sources = streamJson.data && streamJson.data.sources;
-            if (!sources || sources.length === 0) throw new Error('No sources found in API response');
-
-            const resolveUrl = sources[0].resolve_url;
-            log(\`Resolve URL: \${resolveUrl}\`);
-
-            el('player-msg').innerText = '2. Unwrapping Video (Client-Side)...';
-            
-            const targetRes = await fetch(resolveUrl);
-            const targetJson = await targetRes.json();
-            log('Target Response: ' + JSON.stringify(targetJson, null, 2));
-
             let finalVideoUrl = "";
-            
-            if (targetJson.p2p_url) {
-                finalVideoUrl = targetJson.p2p_url;
-            } else if (targetJson.sources && targetJson.sources.length > 0) {
-                finalVideoUrl = targetJson.sources[0].file;
+            let isEmbed = false;
+
+            if (streamJson.data.url) {
+                // Dramacool format (always embed)
+                finalVideoUrl = streamJson.data.url;
+                isEmbed = true;
+            } else if (streamJson.data.sources) {
+                // Drakorindo format
+                const sources = streamJson.data.sources;
+                if (sources && sources.length > 0) {
+                     finalVideoUrl = sources[0].resolve_url || sources[0].file;
+                }
             }
 
-            if (!finalVideoUrl) throw new Error('No video URL found in target response');
+            if (!finalVideoUrl) throw new Error('No video URL found');
+            log(\`Final URL: \${finalVideoUrl}\`);
 
-            // IFRAME STRATEGY (Final Fallback)
-            el('player-msg').innerText = 'Playing via Embed...';
-            el('videoPlayer').style.display = 'none'; 
-            
-            let iframe = document.getElementById('iframePlayer');
-            if (!iframe) {
-                iframe = document.createElement('iframe');
-                iframe.id = 'iframePlayer';
-                iframe.style.width = '100%';
-                iframe.style.height = '450px';
-                iframe.style.border = 'none';
-                iframe.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture';
-                iframe.allowFullscreen = true;
-                el('player-container').appendChild(iframe);
-            }
-            
-            if (finalVideoUrl.includes('.stream/') || finalVideoUrl.includes('#')) {
-                 el('player-msg').innerHTML = `
-        < strong > Video Protected (Cannot Embed)</strong > <br>
-            <a href="${finalVideoUrl}" target="_blank" style="display:inline-block; padding:10px 20px; background:blue; color:white; text-decoration:none; margin-top:10px; border-radius:5px;">
-                👉 KLIK DISINI UNTUK NONTON (Buka Tab Baru)
-            </a>
-            <br><br>
-                <iframe src="${finalVideoUrl}" style="width:100%; height:400px; border:1px solid #333;"></iframe>
-                `;
-            } else {
-                    el('videoPlayer').src = finalVideoUrl;
-                el('videoPlayer').style.display = 'block';
-                iframe.style.display = 'none';
-                el('videoPlayer').play();
+            // STRATEGY SELECTION
+            if (isEmbed || finalVideoUrl.includes('.stream/') || finalVideoUrl.includes('#') || finalVideoUrl.includes('asianload')) {
+                 el('player-msg').innerHTML = \`
+                    <iframe id="iframePlayer" src="\${finalVideoUrl}" style="width:100%; height:450px; border:none;" allowfullscreen></iframe>
+                    <br>
+                    <a href="\${finalVideoUrl}" target="_blank" style="color:blue; font-weight:bold;">Open Direct Link (New Tab)</a>
+                 \`;
+             } else {
+                 el('videoPlayer').src = finalVideoUrl;
+                 el('videoPlayer').style.display = 'block';
+                 el('player-msg').innerText = 'Playing Native Video...';
+                 el('videoPlayer').play();
             }
 
         } catch (e) {
-                    log(e.message, true);
-                el('player-msg').innerText = \`Error: \${e.message}. Check Debug Log below.\`;
-
-                if (e.message.includes('Failed to fetch')) {
-                    el('debug').innerHTML += \`<div class="error">
-                    <br><strong>CORS ERROR DETECTED!</strong>
-                        <br>The browser blocked the request to api.drakorkita.cc.
-                            <br>This confirms that Client-Side fetching is also blocked by CORS policy.
-                                <br>You need a CORS Proxy (like cors-anywhere) or the Target Server strictly blocks external origins.
-                                </div>\`;
-            }
+            log(e.message, true);
+            el('player-msg').innerText = \`Error: \${e.message}\`;
         }
     }
-                            </script>
+</script>
 
-                        </body>
-                    </html>
-                    `;
-                    res.send(html);
+</body>
+</html>
+    `;
+    res.send(html);
 });
 
 app.get('/debug', (req, res) => {
-                        res.json({
-                            message: 'Debug endpoint',
-                            receivedUrl: req.url,
-                            baseUrl: req.baseUrl,
-                            originalUrl: req.originalUrl
-                        });
+    res.json({
+        message: 'Debug endpoint',
+        receivedUrl: req.url,
+        baseUrl: req.baseUrl,
+        originalUrl: req.originalUrl
+    });
 });
 
-// TEST CHEERIO ISOLATION
-app.get('/test-cheerio', (req, res) => {
-    try {
-        const cheerio = require('cheerio');
-                    const $ = cheerio.load('<html><body><h1>Hello</h1></body></html>');
-                    const text = $('h1').text();
-                    res.json({status: 'OK', cheerio: 'loaded', parsed: text });
-    } catch (err) {
-                        res.status(500).json({ status: 'FAIL', error: err.message, stack: err.stack });
-    }
-});
+// Mount Dramacool Routes
+app.use('/api/dramacool', require('./src/routes_dramacool'));
 
-                    // Diagnose Route (Testing)
-                    app.use('/diagnose', require('./diagnose'));
-
-// TEST DYNAMIC SCRAPER LOAD
-app.get('/test-scraper', async (req, res) => {
-    try {
-        const scraper = require('./scraper');
-                    res.json({status: 'Scraper loaded', type: typeof scraper });
-    } catch (err) {
-                        res.status(500).json({
-                            status: 'SCRAPER LOAD FAILED',
-                            error: err.message,
-                            stack: err.stack
-                        });
-    }
-});
-
-// TEST DYNAMIC ROUTES LOAD
-app.get('/test-routes', async (req, res) => {
-    try {
-        const routes = require('./routes');
-                    res.json({status: 'Routes loaded', type: typeof routes });
-    } catch (err) {
-                        res.status(500).json({
-                            status: 'ROUTES LOAD FAILED',
-                            error: err.message,
-                            stack: err.stack
-                        });
-    }
-});
-
-                    // Main Route - LAZY LOADED to avoid cold-start crash
-                    let routesLoaded = null;
+// Main Route - LAZY LOADED to avoid cold-start crash
+let routesLoaded = null;
 app.use('/api/drakorindo', (req, res, next) => {
     if (!routesLoaded) {
         try {
-                        routesLoaded = require('./routes');
+            routesLoaded = require('./routes');
         } catch (err) {
-            return res.status(500).json({error: 'Failed to load routes', message: err.message });
+            return res.status(500).json({ error: 'Failed to load routes', message: err.message });
         }
     }
-                    routesLoaded(req, res, next);
+    routesLoaded(req, res, next);
 });
 
 // 404
 app.use((req, res) => {
-                        res.status(404).json({
-                            status: false,
-                            message: 'Endpoint not found'
-                        });
+    res.status(404).json({
+        status: false,
+        message: 'Endpoint not found'
+    });
 });
 
-                    // Only listen if run directly (Localhost)
-                    if (require.main === module) {
-                        app.listen(PORT, () => {
-                            console.log(`Server running on port ${PORT}`);
-                            console.log(`Test: http://localhost:${PORT}/api/drakorindo/latest`);
-                        });
+// Only listen if run directly (Localhost)
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+        console.log(`Test: http://localhost:${PORT}/test`);
+    });
 }
 
-                    module.exports = app;
+module.exports = app;

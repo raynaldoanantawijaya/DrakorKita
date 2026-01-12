@@ -174,7 +174,7 @@ app.get('/test', (req, res) => {
             eps.forEach(ep => {
                 const btn = document.createElement('button');
                 btn.className = 'ep-btn';
-                btn.innerText = \`Ep \${ep.title}\`;
+                btn.innerText = \`Ep \${ep.episode}\`;
                 btn.onclick = () => playEpisode(ep.url);
                 el('epList').appendChild(btn);
             });
@@ -199,7 +199,11 @@ app.get('/test', (req, res) => {
             
             if (!streamJson.status) throw new Error('Stream API Failed');
             
-            const resolveUrl = streamJson.url;
+            // Fix: Extract resolve_url from sources array correctly
+            const sources = streamJson.data && streamJson.data.sources;
+            if (!sources || sources.length === 0) throw new Error('No sources found in API response');
+
+            const resolveUrl = sources[0].resolve_url;
             log(\`Resolve URL: \${resolveUrl}\`);
 
             el('player-msg').innerText = '2. Unwrapping Video (Client-Side)...';

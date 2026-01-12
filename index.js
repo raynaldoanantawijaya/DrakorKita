@@ -22,6 +22,12 @@ app.get('/', (req, res) => {
     res.json({ message: 'Root of API (Isolated)' });
 });
 
+// Serve the Test Player at /test
+const path = require('path');
+app.get('/test', (req, res) => {
+    res.sendFile(path.join(__dirname, 'test_player.html'));
+});
+
 app.get('/debug', (req, res) => {
     res.json({
         message: 'Debug endpoint',

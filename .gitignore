@@ -5,3 +5,7 @@ node_modules
 network_log.json
 *.png
 *.webp
+test_*.js
+debug_*.js
+verify_*.js
+proxy_*.js

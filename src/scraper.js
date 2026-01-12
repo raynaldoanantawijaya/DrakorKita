@@ -1,20 +1,31 @@
 const cheerio = require('cheerio');
 const { normalizeSlug, parseViews, extractIdFromUrl } = require('./utils');
+const { HttpsProxyAgent } = require('https-proxy-agent'); // Supports HTTP/HTTPS proxies
 
 class DrakorScraper {
     constructor() {
         this.baseUrl = 'https://drakorindo18.mywap.blog';
         this.apiBase = 'https://api.drakorkita.cc/c_api';
+
+        // You can set a proxy URL via env var or hardcode for testing
+        // Format: 'http://user:pass@host:port' or 'http://host:port'
+        this.proxyUrl = process.env.PROXY_URL || null;
     }
 
     async fetchHtml(url) {
         try {
-            const response = await fetch(url, {
+            const options = {
                 headers: {
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                     'Referer': this.baseUrl
                 }
-            });
+            };
+
+            if (this.proxyUrl) {
+                options.agent = new HttpsProxyAgent(this.proxyUrl);
+            }
+
+            const response = await fetch(url, options);
             if (!response.ok) throw new Error(`Fetch failed: ${response.status}`);
             return await response.text();
         } catch (error) {
@@ -25,13 +36,19 @@ class DrakorScraper {
 
     async fetchJson(url) {
         try {
-            const response = await fetch(url, {
+            const options = {
                 headers: {
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                     'Referer': this.baseUrl,
                     'X-Requested-With': 'XMLHttpRequest'
                 }
-            });
+            };
+
+            if (this.proxyUrl) {
+                options.agent = new HttpsProxyAgent(this.proxyUrl);
+            }
+
+            const response = await fetch(url, options);
             if (!response.ok) throw new Error(`Fetch JSON failed: ${response.status}`);
             return await response.json();
         } catch (error) {

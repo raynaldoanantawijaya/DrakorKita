@@ -74,9 +74,9 @@ app.get('/test-routes', async (req, res) => {
     }
 });
 
-// Main Route - DISABLED UNTIL WE FIX
-// const routes = require('./routes');
-// app.use('/api/drakorindo', routes);
+// Main Route
+const routes = require('./routes');
+app.use('/api/drakorindo', routes);
 
 // 404
 app.use((req, res) => {

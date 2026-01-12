@@ -13,8 +13,13 @@ app.use((req, res, next) => {
     next();
 });
 
+// ULTIMATE HEALTH CHECK
+app.get('/health', (req, res) => {
+    res.status(200).send('Server is Clean and Running (Express v4)');
+});
+
 app.get('/', (req, res) => {
-    res.json({ message: 'Root of API', url: req.url });
+    res.json({ message: 'Root of API (Isolated)' });
 });
 
 app.get('/debug', (req, res) => {
@@ -26,12 +31,12 @@ app.get('/debug', (req, res) => {
     });
 });
 
-// Diagnose Route
-app.use('/diagnose', require('./diagnose'));
+// Diagnose Route (Keep this one but ensure it doesn't auto-crash)
+// app.use('/diagnose', require('./diagnose')); // Comment out for safety first
 
-// Main Route
-const routes = require('./routes');
-app.use('/api/drakorindo', routes);
+// TEMPORARY: Comment out heavy routes to isolate crash source
+// const routes = require('./routes');
+// app.use('/api/drakorindo', routes);
 
 // 404
 app.use((req, res) => {

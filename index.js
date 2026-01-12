@@ -60,7 +60,21 @@ app.get('/test-scraper', async (req, res) => {
     }
 });
 
-// Main Route - DISABLED UNTIL WE FIX SCRAPER
+// TEST DYNAMIC ROUTES LOAD
+app.get('/test-routes', async (req, res) => {
+    try {
+        const routes = require('./routes');
+        res.json({ status: 'Routes loaded', type: typeof routes });
+    } catch (err) {
+        res.status(500).json({
+            status: 'ROUTES LOAD FAILED',
+            error: err.message,
+            stack: err.stack
+        });
+    }
+});
+
+// Main Route - DISABLED UNTIL WE FIX
 // const routes = require('./routes');
 // app.use('/api/drakorindo', routes);
 

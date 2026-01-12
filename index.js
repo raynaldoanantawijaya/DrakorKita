@@ -74,9 +74,18 @@ app.get('/test-routes', async (req, res) => {
     }
 });
 
-// Main Route
-const routes = require('./routes');
-app.use('/api/drakorindo', routes);
+// Main Route - LAZY LOADED to avoid cold-start crash
+let routesLoaded = null;
+app.use('/api/drakorindo', (req, res, next) => {
+    if (!routesLoaded) {
+        try {
+            routesLoaded = require('./routes');
+        } catch (err) {
+            return res.status(500).json({ error: 'Failed to load routes', message: err.message });
+        }
+    }
+    routesLoaded(req, res, next);
+});
 
 // 404
 app.use((req, res) => {

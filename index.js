@@ -34,9 +34,9 @@ app.get('/debug', (req, res) => {
 // Diagnose Route (Testing)
 app.use('/diagnose', require('./diagnose'));
 
-// TEMPORARY: Comment out heavy routes to isolate crash source
-// const routes = require('./routes');
-// app.use('/api/drakorindo', routes);
+// Main Route
+const routes = require('./routes');
+app.use('/api/drakorindo', routes);
 
 // 404
 app.use((req, res) => {

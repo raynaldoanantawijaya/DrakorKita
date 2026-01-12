@@ -31,8 +31,8 @@ app.get('/debug', (req, res) => {
     });
 });
 
-// Diagnose Route (Keep this one but ensure it doesn't auto-crash)
-// app.use('/diagnose', require('./diagnose')); // Comment out for safety first
+// Diagnose Route (Testing)
+app.use('/diagnose', require('./diagnose'));
 
 // TEMPORARY: Comment out heavy routes to isolate crash source
 // const routes = require('./routes');

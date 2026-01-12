@@ -4,18 +4,19 @@ const { HttpsProxyAgent } = require('https-proxy-agent');
 
 class DramacoolScraper {
     constructor() {
-        this.baseUrl = 'https://dramacool.bg';
+        // Changed to asianc.sh - often more stable mirror than dramacool.bg
+        this.baseUrl = 'https://asianc.sh';
 
         // Proxy Config (Optional - can be toggled)
         // const PROXY_URL = 'http://ikipfdis:z7x7yl9x6szs@198.105.121.200:6462';
 
         this.client = axios.create({
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                 'Referer': this.baseUrl
             },
             // httpsAgent: new HttpsProxyAgent(PROXY_URL), // Uncomment if needed
-            timeout: 10000,
+            timeout: 30000, // 30s timeout
             rejectUnauthorized: false // Bypass SSL errors
         });
     }
@@ -23,6 +24,7 @@ class DramacoolScraper {
     async getLatest(page = 1) {
         try {
             const url = `${this.baseUrl}/recently-added?page=${page}`;
+            console.log(`Scraping Latest: ${url}`);
             const { data } = await this.client.get(url);
             const $ = cheerio.load(data);
 
@@ -43,9 +45,10 @@ class DramacoolScraper {
                     time
                 });
             });
+            console.log(`Found ${results.length} items`);
             return results;
         } catch (e) {
-            console.error('Latest Error:', e.message);
+            console.error(`Latest Error (${this.baseUrl}):`, e.message);
             return [];
         }
     }
@@ -131,10 +134,14 @@ class DramacoolScraper {
             const $ = cheerio.load(data);
 
             // Extract Iframe
-            const iframeSrc = $('iframe').attr('src'); // Main player
-            const serverName = 'Standard';
+            let iframeSrc = $('iframe').attr('src'); // Main player
 
-            const link = iframeSrc.startsWith('//') ? `https:${iframeSrc}` : iframeSrc;
+            if (!iframeSrc) {
+                // Fallback: search for other players/servers
+                iframeSrc = $('.server-container .tab-content iframe').attr('src');
+            }
+
+            const link = iframeSrc && iframeSrc.startsWith('//') ? `https:${iframeSrc}` : iframeSrc;
 
             return {
                 url: link,

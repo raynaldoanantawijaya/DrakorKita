@@ -3,8 +3,8 @@ const router = express.Router();
 const axios = require('axios');
 const { HttpsProxyAgent } = require('https-proxy-agent');
 
-// Proxy Config
-const PROXY_URL = 'http://ikipfdis:z7x7yl9x6szs@142.111.48.253:7030';
+// Proxy Config (UK Server)
+const PROXY_URL = 'http://ikipfdis:z7x7yl9x6szs@198.105.121.200:6462';
 
 router.get('/', async (req, res) => {
     const report = {

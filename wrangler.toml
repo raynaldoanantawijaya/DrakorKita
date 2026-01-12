@@ -1,0 +1,9 @@
+name = "drakor-kita-worker"
+main = "src/worker.js"
+compatibility_date = "2024-01-01"
+
+[build]
+command = "" # No custom build command needed for simple ES usage usually, or use default
+
+# If needed we can use node_compat = true but Hono+Cheerio usually fine.
+node_compat = true

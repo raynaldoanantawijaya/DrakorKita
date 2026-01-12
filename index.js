@@ -46,9 +46,9 @@ app.get('/test-cheerio', (req, res) => {
 // Diagnose Route (Testing)
 app.use('/diagnose', require('./diagnose'));
 
-// Main Route - TEMPORARILY DISABLED
-// const routes = require('./routes');
-// app.use('/api/drakorindo', routes);
+// Main Route
+const routes = require('./routes');
+app.use('/api/drakorindo', routes);
 
 // 404
 app.use((req, res) => {

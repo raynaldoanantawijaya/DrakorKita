@@ -18,7 +18,6 @@ class DrakorScraper {
                 'Referer': 'https://drakorindo18.mywap.blog'
             },
             httpsAgent: new HttpsProxyAgent(PROXY_URL),
-            httpAgent: new HttpsProxyAgent(PROXY_URL), // Handle both protocols
             timeout: 15000 // 15s timeout
         });
     }

@@ -2,10 +2,11 @@ const express = require('express');
 const router = express.Router();
 const scraper = require('./scraper');
 const { responseSuccess, responseError, extractIdFromUrl } = require('./utils');
-const apicache = require('apicache');
+// const apicache = require('apicache'); // DISABLED for Serverless compatibility
 
-// Cache configuration
-const cache = apicache.middleware;
+// Cache configuration - DISABLED for now
+// const cache = apicache.middleware;
+const cache = () => (req, res, next) => next(); // Passthrough middleware
 
 // 1. GET /vip - Trending
 router.get('/vip', cache('1 hour'), async (req, res) => {

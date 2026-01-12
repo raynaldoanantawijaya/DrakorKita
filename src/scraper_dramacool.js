@@ -4,8 +4,8 @@ const { HttpsProxyAgent } = require('https-proxy-agent');
 
 class DramacoolScraper {
     constructor() {
-        // Changed to asianc.sh - often more stable mirror than dramacool.bg
-        this.baseUrl = 'https://asianc.sh';
+        // Changed to dramacool.hr - confirmed accessible via ping
+        this.baseUrl = 'https://dramacool.hr';
 
         // Proxy Config (Optional - can be toggled)
         // const PROXY_URL = 'http://ikipfdis:z7x7yl9x6szs@198.105.121.200:6462';

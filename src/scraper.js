@@ -1,4 +1,5 @@
 const cheerio = require('cheerio');
+const fetch = require('node-fetch');
 const { normalizeSlug, parseViews, extractIdFromUrl } = require('./utils');
 const { HttpsProxyAgent } = require('https-proxy-agent'); // Supports HTTP/HTTPS proxies
 

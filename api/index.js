@@ -27,7 +27,7 @@ app.get('/debug', (req, res) => {
 });
 
 // Main Route
-const routes = require('./routes');
+const routes = require('../src/routes');
 app.use('/api/drakorindo', routes);
 
 // 404

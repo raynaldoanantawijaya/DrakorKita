@@ -1,9 +1,7 @@
 name = "drakor-kita-worker"
-main = "src/worker.js"
+main = "dist/_worker.js"
 compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
 
 [build]
-command = "" # No custom build command needed for simple ES usage usually, or use default
-
-# If needed we can use node_compat = true but Hono+Cheerio usually fine.
-node_compat = true
+command = "npm run build:pages"

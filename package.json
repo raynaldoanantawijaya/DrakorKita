@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/index.js",
-    "build:pages": "esbuild src/worker.js --bundle --outfile=dist/_worker.js --format=esm --platform=neutral"
+    "build:pages": "node build_worker.js"
   },
   "keywords": [],
   "author": "",
@@ -23,6 +23,7 @@
     "wrangler": "^4.58.0"
   },
   "devDependencies": {
+    "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "esbuild": "^0.27.2"
   }
 }

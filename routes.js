@@ -136,7 +136,7 @@ router.get('/stream', cache('5 minutes'), async (req, res) => {
         const targetUrl = req.query.url;
         if (!targetUrl) return res.status(400).json(responseError('Missing url param'));
 
-        if (!targetUrl.includes('api.drakorkita.cc')) {
+        if (!targetUrl.includes('drakorkita') && !targetUrl.includes('nicewap')) {
             return res.status(400).json(responseError('Invalid URL domain'));
         }
 
@@ -162,7 +162,8 @@ router.get('/stream', cache('5 minutes'), async (req, res) => {
                             type: args[2].replace(/'/g, ''),
                             resolution: args[3].replace(/'/g, ''),
                             server_id: args[4].replace(/'/g, ''),
-                            resolve_url: `https://api.drakorkita.cc/c_api/video_p2p.php?is_mob=0&is_uc=0&id=${id}&qua=${args[2].replace(/'/g, '')}&res=${args[3].replace(/'/g, '')}&server_id=${args[4].replace(/'/g, '')}&tag=${args[1].replace(/'/g, '')}&t=${Math.floor(Date.now() / 1000)}&ver=1.08`
+                            // Use the scraper's dynamic API base if possible, or the new known working domain
+                            resolve_url: `${scraper.apiBase}/video_p2p.php?is_mob=0&is_uc=0&id=${id}&qua=${args[2].replace(/'/g, '')}&res=${args[3].replace(/'/g, '')}&server_id=${args[4].replace(/'/g, '')}&tag=${args[1].replace(/'/g, '')}&t=${Math.floor(Date.now() / 1000)}&ver=1.08`
                         });
                     } else {
                         console.log(`[Stream Debug] Args mismatch: ${args ? args.length : 0}`);

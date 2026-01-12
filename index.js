@@ -222,10 +222,31 @@ app.get('/test', (req, res) => {
 
             if (!finalVideoUrl) throw new Error('No video URL found in target response');
 
-            el('player-msg').innerText = 'Playing...';
-            el('videoPlayer').src = finalVideoUrl;
-            el('videoPlayer').style.display = 'block';
-            el('videoPlayer').play();
+            // IFRAME STRATEGY (Final Fallback)
+            el('player-msg').innerText = 'Playing via Embed...';
+            el('videoPlayer').style.display = 'none'; 
+            
+            let iframe = document.getElementById('iframePlayer');
+            if (!iframe) {
+                iframe = document.createElement('iframe');
+                iframe.id = 'iframePlayer';
+                iframe.style.width = '100%';
+                iframe.style.height = '450px';
+                iframe.style.border = 'none';
+                iframe.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture';
+                iframe.allowFullscreen = true;
+                el('player-container').appendChild(iframe);
+            }
+            
+            if (finalVideoUrl.includes('.stream/') || finalVideoUrl.includes('#')) {
+                 iframe.src = finalVideoUrl;
+                 iframe.style.display = 'block';
+            } else {
+                 el('videoPlayer').src = finalVideoUrl;
+                 el('videoPlayer').style.display = 'block';
+                 iframe.style.display = 'none';
+                 el('videoPlayer').play();
+            }
 
         } catch (e) {
             log(e.message, true);
